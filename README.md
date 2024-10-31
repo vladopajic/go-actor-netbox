@@ -8,7 +8,7 @@
 [![Release](https://img.shields.io/github/release/vladopajic/go-actor-netbox.svg?style=flat-square)](https://github.com/vladopajic/go-actor-netbox/releases/latest)
 
 
-`go-actor`'s `Mailbox` implemented with different networked functionality.
+`go-actor`'s `Mailbox` implemented with different network functionality.
 
 | Type        | Status                    |
 |-------------|---------------------------|
