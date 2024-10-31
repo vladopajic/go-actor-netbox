@@ -1,0 +1,10 @@
+# Config file for go-test-coverage github action.
+# go-actor-netbox commits to keep 100% test coverage.
+
+profile: cover.out
+local-prefix: "github.com/vladopajic/go-actor-netbox"
+threshold:
+  total: 0
+exclude:
+  paths:
+    - examples

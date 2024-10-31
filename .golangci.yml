@@ -1,0 +1,188 @@
+run:
+  deadline: 5m
+
+linters:
+  enable:
+    - asasalint
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - containedctx
+    - contextcheck
+    - cyclop
+    - copyloopvar
+    - decorder
+    - dogsled
+    - dupl
+    - durationcheck
+    - dupword
+    - err113
+    - errcheck
+    - errchkjson
+    - errname
+    - errorlint
+    - exhaustive
+    - forbidigo
+    - forcetypeassert
+    - funlen
+    - gocheckcompilerdirectives
+    - gochecknoglobals
+    - gochecknoinits
+    - gochecksumtype
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - godox
+    - gofmt
+    - gofumpt
+    - goheader
+    - goimports
+    - gomoddirectives
+    - gomodguard
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - govet
+    - grouper
+    - importas
+    - inamedparam
+    - interfacebloat
+    - ineffassign
+    - lll
+    - loggercheck
+    - maintidx
+    - mirror
+    - misspell
+    - mnd
+    - nakedret
+    - nestif
+    - nilerr
+    - nilnil
+    - nlreturn
+    - noctx
+    - nolintlint
+    - nonamedreturns
+    - nosprintfhostport
+    - paralleltest
+    - perfsprint
+    - prealloc
+    - predeclared
+    - promlinter
+    - protogetter
+    - reassign
+    - revive
+    - sloglint
+    - sqlclosecheck
+    - staticcheck
+    - stylecheck
+    - tagalign
+    - tagliatelle
+    - tenv
+    - testifylint
+    - testpackage
+    - thelper
+    - tparallel
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - usestdlibvars
+    - wastedassign 
+    - whitespace
+    - wrapcheck
+    - wsl
+    - zerologlint
+
+linters-settings:
+  errcheck:
+    check-blank: true
+    disable-default-exclusions: true
+  errchkjson:
+    report-no-exported: true
+  dupl:
+    threshold: 120
+  tagliatelle:
+    case:
+      use-field-name: true
+      rules:
+        yaml: kebab
+  testifylint: 
+    enable-all: true
+  depguard:
+      rules:
+        main:
+          files:
+            - $all
+            - "!$test"
+          allow:
+            - $gostd
+            - github.com/gammazero/deque      ## needed for queue implementation
+            - github.com/stretchr             ## needed for test helpers
+        test:
+          files:
+            - "$test"
+          allow:
+            - $gostd
+            - github.com/stretchr
+            - github.com/vladopajic/go-actor
+  forbidigo:
+      forbid:
+        - 'time\.Sleep*(# Do not sleep)?'
+        - 'panic*(# Do not panic)?'
+        - 'os\.Exit*(# Do not exit)?'
+        - p: ^fmt\.Print*$
+          msg: Do not commit print statements.
+  funlen:
+    ignore-comments: true
+  gocognit:
+    min-complexity: 20
+  gocyclo:
+    min-complexity: 20
+  goconst:
+    numbers: true
+  grouper:
+    import-require-single-import: true
+  unparam:
+    check-exported: true
+  nolintlint:
+    require-explanation: true
+  maintidx:
+    under: 40
+  misspell:
+    locale: US
+  govet:
+    enable-all: true
+    disable:
+     - fieldalignment
+  lll:
+    line-length: 90
+    tab-width: 1
+  nlreturn:
+    block-size: 5
+  goimports:
+    local-prefixes: github.com/vladopajic/go-actor-netbox
+  tenv:
+    all: true
+  wsl:
+    force-err-cuddling: true
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - funlen        ## Function length is okay due to many tests cases
+        - wrapcheck     ## No need to check wrapping errors in tests
+
+    - path: _test\.go   ## Enable dot-imports in tests
+      text: "dot-imports"
+      linters:
+        - revive
+    
+    - text: "require-error" ## Option to disable this error does not work
+      linters:
+        - testifylint
+
+    - path: export_test\.go
+      linters:
+        - revive      ## Disabling linter because we intentionally want to use unexported types in tests
