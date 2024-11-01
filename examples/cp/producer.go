@@ -9,12 +9,11 @@ import (
 	"github.com/vladopajic/go-actor/actor"
 )
 
-func NewProducerWorker(
+func NewProducer(
 	outMbx actor.MailboxSender[[]byte],
-) actor.Worker {
-	return &producerWorker{
-		outMbx: outMbx,
-	}
+) actor.Actor {
+	w := &producerWorker{outMbx: outMbx}
+	return actor.New(w)
 }
 
 type producerWorker struct {
@@ -37,7 +36,13 @@ func (w *producerWorker) DoWork(c actor.Context) actor.WorkerStatus {
 			return actor.WorkerContinue
 		}
 
-		w.outMbx.Send(c, buf.Bytes())
+		err = w.outMbx.Send(c, buf.Bytes())
+		if err != nil {
+			fmt.Printf("outMbx.Send failed: %v\n", err)
+			return actor.WorkerContinue
+		}
+
+		fmt.Print(".")
 
 		return actor.WorkerContinue
 	}

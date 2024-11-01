@@ -8,10 +8,11 @@ import (
 	"github.com/vladopajic/go-actor/actor"
 )
 
-func NewConsumerWorker(
+func NewConsumer(
 	inMbx actor.MailboxReceiver[[]byte],
-) actor.Worker {
-	return &consumerWorker{inMbx: inMbx}
+) actor.Actor {
+	w := &consumerWorker{inMbx}
+	return actor.New(w)
 }
 
 type consumerWorker struct {

@@ -6,21 +6,24 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/vladopajic/go-actor/actor"
+
 	"github.com/vladopajic/go-actor-netbox/examples/cp"
 	"github.com/vladopajic/go-actor-netbox/netbox"
-	"github.com/vladopajic/go-actor/actor"
 )
 
 func main() {
 	conn := makeConn()
 	defer conn.Close()
 
-	receiverMbx := netbox.NewWsReceiver(conn)
-	consumer := actor.New(cp.NewConsumerWorker(receiverMbx))
+	receiverMbx := netbox.NewWsReceiver()
+	consumer := cp.NewConsumer(receiverMbx)
 
 	a := actor.Combine(receiverMbx, consumer).Build()
 	a.Start()
 	defer a.Stop()
+
+	receiverMbx.SetConn(conn)
 
 	select {}
 }

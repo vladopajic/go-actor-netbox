@@ -8,10 +8,16 @@ import (
 type Receiver interface {
 	actor.Actor
 	actor.MailboxReceiver[[]byte]
+	SetConn(conn *websocket.Conn)
 }
 
 type Sender interface {
 	actor.Actor
 	actor.MailboxSender[[]byte]
 	SetConn(conn *websocket.Conn)
+}
+
+type msgPromise struct {
+	msg  []byte
+	errC chan error
 }

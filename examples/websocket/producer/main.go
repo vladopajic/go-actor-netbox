@@ -12,21 +12,21 @@ import (
 
 func main() {
 	senderMbx := netbox.NewWsSender()
-	producer := actor.New(cp.NewProducerWorker(senderMbx))
+	producer := cp.NewProducer(senderMbx)
 
 	a := actor.Combine(senderMbx, producer).Build()
 	a.Start()
 	defer a.Stop()
 
-	http.HandleFunc("/ws", wsHandler(senderMbx))
+	http.HandleFunc("/ws", wsHandler(senderMbx.SetConn))
 	log.Fatal(http.ListenAndServe(":8088", nil))
 }
 
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { return true },
-}
+func wsHandler(cb func(conn *websocket.Conn)) http.HandlerFunc {
+	upgrader := websocket.Upgrader{
+		CheckOrigin: func(_ *http.Request) bool { return true },
+	}
 
-func wsHandler(senderMbx netbox.Sender) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
@@ -35,7 +35,7 @@ func wsHandler(senderMbx netbox.Sender) http.HandlerFunc {
 		}
 		defer conn.Close()
 
-		senderMbx.SetConn(conn)
+		cb(conn)
 
 		select {}
 	}
