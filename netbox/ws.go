@@ -7,10 +7,10 @@ import (
 	"github.com/vladopajic/go-actor/actor"
 )
 
-func NewWsReceiver(conn *websocket.Conn) Receiver {
+func NewWsReceiver() Receiver {
 	receiver := &wsReceiver{
-		mbx:  actor.NewMailbox[[]byte](),
-		conn: conn,
+		mbx:   actor.NewMailbox[[]byte](),
+		connC: make(chan *websocket.Conn, 1),
 	}
 	receiver.Actor = actor.Combine(actor.New(receiver), receiver.mbx).Build()
 	receiver.MailboxReceiver = receiver.mbx
@@ -22,14 +22,35 @@ type wsReceiver struct {
 	actor.Actor
 	actor.MailboxReceiver[[]byte]
 
-	mbx  actor.Mailbox[[]byte]
-	conn *websocket.Conn
+	mbx   actor.Mailbox[[]byte]
+	connC chan *websocket.Conn
+	conn  *websocket.Conn
+}
+
+func (r *wsReceiver) SetConn(conn *websocket.Conn) {
+	r.connC <- conn
 }
 
 func (r *wsReceiver) DoWork(ctx context.Context) actor.WorkerStatus {
+	if r.conn == nil {
+		select {
+		case <-ctx.Done():
+			return actor.WorkerEnd
+
+		case conn := <-r.connC:
+			r.conn = conn
+			return actor.WorkerContinue
+		}
+	}
+
 	select {
 	case <-ctx.Done():
 		return actor.WorkerEnd
+
+	case conn := <-r.connC:
+		r.conn = conn
+		return actor.WorkerContinue
+
 	default:
 	}
 
@@ -48,7 +69,7 @@ func (r *wsReceiver) DoWork(ctx context.Context) actor.WorkerStatus {
 func NewWsSender() Sender {
 	sender := &wsSender{
 		mbx:   make(chan msgPromise),
-		connC: make(chan *websocket.Conn),
+		connC: make(chan *websocket.Conn, 1),
 	}
 	sender.Actor = actor.New(sender)
 
@@ -65,11 +86,6 @@ type wsSender struct {
 
 func (s *wsSender) SetConn(conn *websocket.Conn) {
 	s.connC <- conn
-}
-
-type msgPromise struct {
-	msg  []byte
-	errC chan error
 }
 
 func (s *wsSender) Send(ctx context.Context, msg []byte) error {

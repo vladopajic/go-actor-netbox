@@ -16,7 +16,9 @@ lint: install-golangcilint
 # Runs tests on entire repo
 .PHONY: test
 test: 
-	go test -timeout=3s -race -count=10 -shuffle=on -failfast ./...
+	go test -timeout=3s -race -count=10 -failfast -shuffle=on -short ./... -coverprofile=./cover.short.profile -covermode=atomic -coverpkg=./...
+	go test -timeout=10s -race -count=1 -failfast  -shuffle=on ./... -coverprofile=./cover.long.profile -covermode=atomic -coverpkg=./...
+
 
 # Code tidy
 .PHONY: tidy
@@ -29,19 +31,14 @@ install-go-test-coverage:
 	go install github.com/vladopajic/go-test-coverage/v2@latest
 
 
-# Generates test coverage profile
-.PHONY: generate-coverage
-generate-coverage:
-	go test ./... -coverprofile=./cover.out -covermode=atomic -coverpkg=./...
-
 # Runs test coverage check
 .PHONY: check-coverage
-check-coverage: generate-coverage
+check-coverage: test
 check-coverage: install-go-test-coverage
 	$(TEST_COVERAGE) -config=./.testcoverage.yml
 
 # View coverage profile
 .PHONY: view-coverage
-view-coverage: generate-coverage
+view-coverage: test
 	go tool cover -html=cover.out -o=cover.html
 	xdg-open cover.html
