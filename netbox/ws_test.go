@@ -61,6 +61,7 @@ func Test_Ws_Integrated(t *testing.T) {
 		data := <-receiverMbx.ReceiveC()
 		assert.Equal(t, i, iFromBytes(data))
 	}
+
 	close(doneC)
 }
 
