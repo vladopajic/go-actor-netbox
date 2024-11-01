@@ -55,6 +55,9 @@ func Test_Ws_Integrated(t *testing.T) {
 		for i := range 10 {
 			fatalErr(senderMbx.Send(ctx, iToBytes(i)))
 		}
+
+		//nolint:contextcheck // relax
+		assert.Error(t, senderMbx.Send(actor.ContextEnded(), iToBytes(100)))
 	}()
 
 	for i := range 10 {

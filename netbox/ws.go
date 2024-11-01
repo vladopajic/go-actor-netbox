@@ -97,7 +97,12 @@ func (s *wsSender) Send(ctx context.Context, msg []byte) error {
 	case s.mbx <- msgProm:
 	}
 
-	return <-msgProm.errC
+	select {
+	case <-ctx.Done():
+		return ctx.Err() //nolint:wrapcheck // relax
+	case err := <-msgProm.errC:
+		return err
+	}
 }
 
 func (s *wsSender) DoWork(ctx context.Context) actor.WorkerStatus {

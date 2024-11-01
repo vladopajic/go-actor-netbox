@@ -31,14 +31,19 @@ install-go-test-coverage:
 	go install github.com/vladopajic/go-test-coverage/v2@latest
 
 
+# Generates test coverage profile
+.PHONY: generate-coverage
+generate-coverage:
+	go test ./... -coverprofile=./cover.all.profile -covermode=atomic -coverpkg=./...
+
 # Runs test coverage check
 .PHONY: check-coverage
-check-coverage: test
+check-coverage: generate-coverage
 check-coverage: install-go-test-coverage
 	$(TEST_COVERAGE) -config=./.testcoverage.yml
 
 # View coverage profile
 .PHONY: view-coverage
-view-coverage: test
-	go tool cover -html=cover.out -o=cover.html
+view-coverage: generate-coverage
+	go tool cover -html=cover.all.profile -o=cover.html
 	xdg-open cover.html
