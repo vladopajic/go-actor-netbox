@@ -7,8 +7,8 @@ import (
 	"github.com/vladopajic/go-actor/actor"
 )
 
-func NewWsReceiver() Receiver {
-	receiver := &wsReceiver{
+func NewWebsocketReceiver() WebsocketReceiver {
+	receiver := &websocketReceiver{
 		mbx:   actor.NewMailbox[[]byte](),
 		connC: make(chan *websocket.Conn, 1),
 	}
@@ -18,7 +18,7 @@ func NewWsReceiver() Receiver {
 	return receiver
 }
 
-type wsReceiver struct {
+type websocketReceiver struct {
 	actor.Actor
 	actor.MailboxReceiver[[]byte]
 
@@ -27,11 +27,11 @@ type wsReceiver struct {
 	conn  *websocket.Conn
 }
 
-func (r *wsReceiver) SetConn(conn *websocket.Conn) {
+func (r *websocketReceiver) SetConn(conn *websocket.Conn) {
 	r.connC <- conn
 }
 
-func (r *wsReceiver) DoWork(ctx context.Context) actor.WorkerStatus {
+func (r *websocketReceiver) DoWork(ctx context.Context) actor.WorkerStatus {
 	if r.conn == nil {
 		select {
 		case <-ctx.Done():
@@ -66,8 +66,8 @@ func (r *wsReceiver) DoWork(ctx context.Context) actor.WorkerStatus {
 	return actor.WorkerContinue
 }
 
-func NewWsSender() Sender {
-	sender := &wsSender{
+func NewWebsocketSender() WebsocketSender {
+	sender := &websocketSender{
 		mbx:   make(chan msgPromise),
 		connC: make(chan *websocket.Conn, 1),
 	}
@@ -76,7 +76,7 @@ func NewWsSender() Sender {
 	return sender
 }
 
-type wsSender struct {
+type websocketSender struct {
 	actor.Actor
 
 	mbx   chan msgPromise
@@ -84,11 +84,11 @@ type wsSender struct {
 	conn  *websocket.Conn
 }
 
-func (s *wsSender) SetConn(conn *websocket.Conn) {
+func (s *websocketSender) SetConn(conn *websocket.Conn) {
 	s.connC <- conn
 }
 
-func (s *wsSender) Send(ctx context.Context, msg []byte) error {
+func (s *websocketSender) Send(ctx context.Context, msg []byte) error {
 	msgProm := msgPromise{msg: msg, errC: make(chan error, 1)}
 
 	select {
@@ -105,7 +105,7 @@ func (s *wsSender) Send(ctx context.Context, msg []byte) error {
 	}
 }
 
-func (s *wsSender) DoWork(ctx context.Context) actor.WorkerStatus {
+func (s *websocketSender) DoWork(ctx context.Context) actor.WorkerStatus {
 	if s.conn == nil {
 		select {
 		case <-ctx.Done():
@@ -132,6 +132,6 @@ func (s *wsSender) DoWork(ctx context.Context) actor.WorkerStatus {
 	}
 }
 
-func (s *wsSender) handleSend(_ context.Context, msg []byte) error {
+func (s *websocketSender) handleSend(_ context.Context, msg []byte) error {
 	return s.conn.WriteMessage(websocket.BinaryMessage, msg) //nolint:wrapcheck // relax
 }

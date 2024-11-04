@@ -5,13 +5,13 @@ import (
 	"github.com/vladopajic/go-actor/actor"
 )
 
-type Receiver interface {
+type WebsocketReceiver interface {
 	actor.Actor
 	actor.MailboxReceiver[[]byte]
 	SetConn(conn *websocket.Conn)
 }
 
-type Sender interface {
+type WebsocketSender interface {
 	actor.Actor
 	actor.MailboxSender[[]byte]
 	SetConn(conn *websocket.Conn)

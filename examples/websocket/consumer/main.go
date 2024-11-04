@@ -16,7 +16,7 @@ func main() {
 	conn := makeConn()
 	defer conn.Close()
 
-	receiverMbx := netbox.NewWsReceiver()
+	receiverMbx := netbox.NewWebsocketReceiver()
 	consumer := cp.NewConsumer(receiverMbx)
 
 	a := actor.Combine(receiverMbx, consumer).Build()

@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	senderMbx := netbox.NewWsSender()
+	senderMbx := netbox.NewWebsocketSender()
 	producer := cp.NewProducer(senderMbx)
 
 	a := actor.Combine(senderMbx, producer).Build()

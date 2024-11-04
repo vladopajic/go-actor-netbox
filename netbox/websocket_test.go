@@ -17,14 +17,21 @@ import (
 	. "github.com/vladopajic/go-actor-netbox/netbox"
 )
 
-func Test_Ws_WorkerEndSig(t *testing.T) {
+func Test_Websocket_WorkerEndSig(t *testing.T) {
 	t.Parallel()
 
-	actor.AssertWorkerEndSig(t, NewWsReceiver())
-	actor.AssertWorkerEndSig(t, NewWsSender())
+	r, s := NewWebsocketReceiver(), NewWebsocketSender()
+	actor.AssertWorkerEndSig(t, r)
+	actor.AssertWorkerEndSig(t, s)
+
+	r.SetConn(&websocket.Conn{})
+	actor.AssertWorkerEndSigAfterIterations(t, r, 2)
+
+	s.SetConn(&websocket.Conn{})
+	actor.AssertWorkerEndSigAfterIterations(t, s, 2)
 }
 
-func Test_Ws_Integrated(t *testing.T) {
+func Test_Websocket_Integrated(t *testing.T) {
 	t.Parallel()
 
 	if testing.Short() {
@@ -32,8 +39,8 @@ func Test_Ws_Integrated(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	senderMbx := NewWsSender()
-	receiverMbx := NewWsReceiver()
+	senderMbx := NewWebsocketSender()
+	receiverMbx := NewWebsocketReceiver()
 
 	doneC := make(chan any)
 
