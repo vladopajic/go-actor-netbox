@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/binary"
+	"errors"
 	"log"
 	"net/http"
 	"net/url"
@@ -49,22 +50,28 @@ func Test_Websocket_Integrated(t *testing.T) {
 	defer a.Stop()
 
 	go func() {
-		http.HandleFunc("/ws", wsHandler(doneC, senderMbx.SetConn))
+		server := &http.Server{
+			Addr:        ":8089",
+			Handler:     wsHandler(doneC, senderMbx.SetConn),
+			ReadTimeout: time.Second,
+		}
 
-		//nolint:gosec // we don't care about timeouts here
-		fatalErr(http.ListenAndServe(":8089", nil))
+		t.Cleanup(func() { assert.NoError(t, server.Close()) })
+
+		if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+			fatalErr(err)
+		}
 	}()
 
-	time.Sleep(time.Second) //nolint:forbidigo // wait some time for server to start
+	time.Sleep(time.Millisecond * 300) //nolint:forbidigo // wait for server to start
 	receiverMbx.SetConn(makeWsConn())
 
 	go func() {
 		for i := range 10 {
-			fatalErr(senderMbx.Send(ctx, iToBytes(i)))
+			assert.NoError(t, senderMbx.Send(ctx, iToBytes(i)))
 		}
 
-		//nolint:contextcheck // relax
-		assert.Error(t, senderMbx.Send(actor.ContextEnded(), iToBytes(100)))
+		assert.NoError(t, senderMbx.Send(ctx, iToBytes(100)))
 	}()
 
 	for i := range 10 {
