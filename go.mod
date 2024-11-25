@@ -4,7 +4,7 @@ go 1.23
 
 require (
 	github.com/gorilla/websocket v1.5.3
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	github.com/vladopajic/go-actor v0.9.1-0.20241104114307-456a592d58e7
 	go.uber.org/goleak v1.3.0
 )
