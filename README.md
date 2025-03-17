@@ -13,8 +13,6 @@
 | Type        | Status                       |
 |-------------|------------------------------|
 | websocket   | draft implementation         |
-| aeron       | todo                         |
-| kafka       | todo                         |
 | other       | your contribution is welcome | 
 
 ## Examples
