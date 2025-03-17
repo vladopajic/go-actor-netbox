@@ -1,6 +1,3 @@
-run:
-  deadline: 5m
-
 linters:
   enable:
     - asasalint
@@ -78,7 +75,6 @@ linters:
     - stylecheck
     - tagalign
     - tagliatelle
-    - tenv
     - testifylint
     - testpackage
     - thelper
