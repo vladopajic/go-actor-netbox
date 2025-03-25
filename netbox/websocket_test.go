@@ -108,7 +108,7 @@ func makeWsConn() *websocket.Conn {
 
 func iToBytes(i int) []byte {
 	buf := new(bytes.Buffer)
-	err := binary.Write(buf, binary.BigEndian, uint64(i)) //nolint:gosec // relax
+	err := binary.Write(buf, binary.BigEndian, uint64(i))
 	fatalErr(err)
 
 	return buf.Bytes()
